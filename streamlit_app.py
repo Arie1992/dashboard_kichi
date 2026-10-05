@@ -64,7 +64,11 @@ def prepare(raw):
     ratings=['Ayam','Sambal','Kol Goreng','Tahu','Tempe','Bayam Crispy','Overall Rasa','Overall Plating','Rasa vs Harga','Porsi vs Harga']
     missing=[k for k in ratings if not found[k]]
     if missing: raise RuntimeError('Kolom rating belum cocok: '+', '.join(missing)+'. Kolom Excel: '+' | '.join(map(str,cols)))
-    d=pd.DataFrame(); d['Timestamp']=pd.to_datetime(raw[found['Timestamp']],errors='coerce',dayfirst=True)
+    d=pd.DataFrame()
+    # Microsoft Forms / SharePoint source stores timestamps as MM/DD/YYYY.
+    # Parse month-first so 10/02/2026 = 2 Oct 2026 (not 10 Feb 2026).
+    ts=raw[found['Timestamp']].astype(str).str.strip()
+    d['Timestamp']=pd.to_datetime(ts,errors='coerce',dayfirst=False)
     d['Outlet']=raw[found['Outlet']].fillna('').astype(str).str.strip() if found['Outlet'] else 'Semua Outlet'
     for k in ratings: d[k]=pd.to_numeric(raw[found[k]],errors='coerce')
     d['Review']=raw[found['Review']].fillna('').astype(str).str.strip() if found['Review'] else ''
