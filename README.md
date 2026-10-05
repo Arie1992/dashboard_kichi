@@ -1,15 +1,8 @@
-# Market Insight Dashboard — reviewed baseline
+# Kichi-Kichi Market Insight — Exact HTML Revision
 
-- Satu URL: `?view=all` dan `?view=geprek`
-- Sidebar hanya **ALL** dan **Ayam Geprek**
-- Sidebar dapat di-hide; tombol ☰ muncul saat sidebar hidden
-- ALL mempertahankan dashboard lama
-- Geprek: UI V6 report yang dikunci (4 KPI, atribut, tren, review rating rendah, distribusi, detail)
-- Tidak ada filter Outlet pada Geprek
-- Source Geprek hanya direct SharePoint link yang diberikan user
-- Cache data 60 detik
-- Tidak ada dummy/local/CSV fallback untuk Geprek
-- Jika SharePoint tidak menghasilkan workbook valid, tampilkan error source
+This revision fixes the visual mismatch in the previous package.
 
-- SharePoint source updated to the user-provided Market Insight - Ayam Geprek Kichi-Kichi.xlsx link (`e=MO7GY1`).
-- `geprek_ui_reference_v6.html` refreshed from the latest UI reference supplied in chat.
+- Ayam Geprek view now renders `geprek_ui_reference_v6.html` directly as the visual source of truth.
+- No custom sidebar/layout is injected into the Ayam Geprek reference view.
+- The SharePoint loader remains in `streamlit_app.py` and is cached for 60 seconds.
+- IMPORTANT: the exact reference currently contains its original demo JS values. The next integration step is data-binding without changing its DOM/CSS.
