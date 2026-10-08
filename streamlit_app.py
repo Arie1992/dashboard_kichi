@@ -109,8 +109,8 @@ def make_html(df, kw):
     mn=df.Timestamp.min().strftime('%Y-%m-%d'); mx=df.Timestamp.max().strftime('%Y-%m-%d')
     return f'''<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Market Insight · Ayam Geprek Kichi-Kichi</title><style>{style}
 .attr{{cursor:pointer}}.attr:hover{{border-color:#79b9bd;box-shadow:0 5px 14px #153c4612}}
-.modalback{{position:fixed;inset:0;background:#082d3b80;display:none;align-items:center;justify-content:center;padding:18px;z-index:999}}.modalback.show{{display:flex}}
-.modal{{background:#fff;width:min(760px,100%);max-height:86vh;overflow:auto;border-radius:16px}}.modalhead{{display:flex;justify-content:space-between;padding:20px 22px 14px;border-bottom:1px solid #e6eceb}}
+.modalback{{position:fixed;inset:0;background:#082d3b80;display:none;align-items:flex-start;justify-content:center;padding:60px 18px 18px;z-index:999}}.modalback.show{{display:flex}}
+.modal{{background:#fff;width:min(760px,100%);max-height:calc(100vh - 90px);overflow:auto;border-radius:16px}}.modalhead{{display:flex;justify-content:space-between;padding:20px 22px 14px;border-bottom:1px solid #e6eceb}}
 .modalhead h3{{margin:0;color:#123d4a}}.close{{border:0;background:#edf3f2;border-radius:9px;width:36px;height:36px;font-size:20px}}.modalbody{{padding:18px 22px 22px}}
 .modalstats{{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:16px}}.mstat{{background:#f5f8f7;border:1px solid #e1e8e7;border-radius:10px;padding:12px}}.mstat span{{display:block;font-size:9px;font-weight:800}}.mstat b{{font-size:21px;color:#123d4a}}
 .analysisbox{{margin-top:9px;padding:10px 12px;background:#f6f9f8;border:1px solid #e2e9e7;border-radius:9px}}
