@@ -99,6 +99,10 @@ def make_html(df, kw):
 .modal{{background:#fff;width:min(760px,100%);max-height:86vh;overflow:auto;border-radius:16px}}.modalhead{{display:flex;justify-content:space-between;padding:20px 22px 14px;border-bottom:1px solid #e6eceb}}
 .modalhead h3{{margin:0;color:#123d4a}}.close{{border:0;background:#edf3f2;border-radius:9px;width:36px;height:36px;font-size:20px}}.modalbody{{padding:18px 22px 22px}}
 .modalstats{{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:16px}}.mstat{{background:#f5f8f7;border:1px solid #e1e8e7;border-radius:10px;padding:12px}}.mstat span{{display:block;font-size:9px;font-weight:800}}.mstat b{{font-size:21px;color:#123d4a}}
+.analysisbox{{margin-top:9px;padding:10px 12px;background:#f6f9f8;border:1px solid #e2e9e7;border-radius:9px}}
+.reasonline{{display:grid;grid-template-columns:minmax(120px,1fr) minmax(180px,2fr) auto;gap:8px;padding:7px 0;border-bottom:1px solid #e7eceb;align-items:center}}
+.reasonline:last-child{{border-bottom:0}}.reasonline b{{color:#173f4b}}.reasonrating{{font-weight:800;color:#b8493d;white-space:nowrap}}
+.originalcomment{{margin-top:10px;padding-top:10px;border-top:1px dashed #d7e0de}}.originalcomment small{{display:block;color:#78898d;font-weight:800;margin-bottom:4px;text-transform:uppercase}}
 .reasonTable{{width:100%;border-collapse:collapse}}.reasonTable th,.reasonTable td{{padding:11px 9px;border-bottom:1px solid #e7eceb;font-size:11px}}.reasonname{{font-weight:750}}
 </style></head><body>
 <header class="hero"><div class="eyebrow">MARKET INSIGHT · CUSTOMER SURVEY</div><h1>Ayam Geprek Kichi-Kichi</h1><p>Ringkasan penilaian produk dan detail respons pelanggan.</p>
@@ -114,7 +118,20 @@ const KEYWORDS={kwdata};
 const ALL={data}; const ATTRS=['Ayam','Sambal','Kol Goreng','Tahu','Tempe','Bayam Crispy']; const ASPECTS=[...ATTRS,'Overall Rasa','Overall Plating','Rasa vs Harga','Porsi vs Harga']; let CURRENT=[];
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}}[m])); const avg=(a,k)=>{{const v=a.map(x=>x[k]).filter(Number.isFinite);return v.length?v.reduce((p,c)=>p+c,0)/v.length:null}}; const fmt=v=>v==null?'-':v.toFixed(2).replace('.',','); const dmy=s=>new Date(s).toLocaleDateString('id-ID',{{day:'2-digit',month:'short',year:'numeric'}}); const dm=s=>new Date(s).toLocaleDateString('id-ID',{{day:'2-digit',month:'short'}});
 const outlets=[...new Set(ALL.map(x=>x.Outlet).filter(Boolean))].sort(); document.getElementById('outletFilter').innerHTML='<option>Semua Outlet</option>'+outlets.map(x=>`<option>${{esc(x)}}</option>`).join(''); document.getElementById('attrFilter').innerHTML='<option>Semua Aspek</option>'+ASPECTS.map(x=>`<option>${{x}}</option>`).join('');
-function renderReviews(){{const a=document.getElementById('attrFilter').value,max=+document.getElementById('rateFilter').value;let out=[];CURRENT.forEach(x=>{{const names=a==='Semua Aspek'?ASPECTS:[a];names.forEach(n=>{{if(Number.isFinite(x[n])&&x[n]<=max)out.push({{...x,attr:n,rating:x[n]}})}})}});out.sort((a,b)=>new Date(b.Timestamp)-new Date(a.Timestamp));document.getElementById('reviews').innerHTML=out.length?out.slice(0,100).map(x=>`<div class="comment"><div class="reviewleft"><b>${{x.attr}} · <span class="ratinglow">${{x.rating}}/5</span></b><span>${{x.Review?`“${{esc(x.Review)}}”`:'<i>Tidak ada review/saran</i>'}}</span></div><span class="date">${{dm(x.Timestamp)}}<br>${{esc(x.Outlet)}}</span></div>`).join(''):'<div class="comment">Tidak ada data pada filter ini.</div>'}}
+function matchedReasons(x,attr){{
+ const txt=normtxt(x.Review), rules=KEYWORDS.filter(k=>k.group===attr), reasons=[];
+ rules.forEach(k=>{{if(txt.includes(normtxt(k.keyword))&&!reasons.includes(k.reason))reasons.push(k.reason)}});
+ return reasons;
+}}
+function renderReviews(){{
+ const a=document.getElementById('attrFilter').value,max=+document.getElementById('rateFilter').value;let out=[];
+ CURRENT.forEach(x=>{{const names=a==='Semua Aspek'?ASPECTS:[a];names.forEach(n=>{{if(Number.isFinite(x[n])&&x[n]<=max)out.push({{...x,attr:n,rating:x[n],reasons:matchedReasons(x,n)}})}})}});
+ out.sort((a,b)=>new Date(b.Timestamp)-new Date(a.Timestamp));
+ document.getElementById('reviews').innerHTML=out.length?out.slice(0,100).map(x=>{{
+   const reasonHtml=x.reasons.length?`<div class="analysisbox">${{x.reasons.map(r=>`<div class="reasonline"><b>${{esc(x.attr)}}</b><span>${{esc(r)}}</span><span class="reasonrating">${{x.rating}}/5</span></div>`).join('')}}</div>`:`<div class="analysisbox"><i>Tidak ada keyword/reason yang cocok untuk atribut ini.</i></div>`;
+   return `<div class="comment"><div class="reviewleft"><b>${{x.attr}} · <span class="ratinglow">${{x.rating}}/5</span></b>${{reasonHtml}}<div class="originalcomment"><small>Komentar Responden</small><span>${{x.Review?`“${{esc(x.Review)}}”`:'<i>Tidak ada review/saran</i>'}}</span></div></div><span class="date">${{dm(x.Timestamp)}}<br>${{esc(x.Outlet)}}</span></div>`;
+ }}).join(''):'<div class="comment">Tidak ada data pada filter ini.</div>'
+}}
 function render(){{const f=document.getElementById('dateFrom').value,t=document.getElementById('dateTo').value,o=document.getElementById('outletFilter').value;CURRENT=ALL.filter(x=>x.Timestamp.slice(0,10)>=f&&x.Timestamp.slice(0,10)<=t&&(o==='Semua Outlet'||x.Outlet===o));document.getElementById('kpiN').textContent=CURRENT.length;document.getElementById('kpiRasa').innerHTML=fmt(avg(CURRENT,'Overall Rasa'))+' <small>/ 5</small>';document.getElementById('kpiPlate').innerHTML=fmt(avg(CURRENT,'Overall Plating'))+' <small>/ 5</small>';const q=[avg(CURRENT,'Rasa vs Harga'),avg(CURRENT,'Porsi vs Harga')].filter(x=>x!=null);document.getElementById('kpiHarga').innerHTML=fmt(q.length?q.reduce((a,b)=>a+b,0)/q.length:null)+' <small>/ 5</small>';
  document.getElementById('attrs').innerHTML=ATTRS.map(n=>{{let v=avg(CURRENT,n);return `<div class="attr" data-attr="${{esc(n)}}"><div class="attrname">${{n}}</div><div class="score">${{fmt(v)}}</div><div class="track"><div class="fill" style="width:${{v?Math.min(100,v/5*100):0}}%"></div></div></div>`}}).join('');
  document.querySelectorAll('.attr[data-attr]').forEach(el=>el.onclick=()=>openAttr(el.dataset.attr));
@@ -122,7 +139,7 @@ function render(){{const f=document.getElementById('dateFrom').value,t=document.
  const dist=[1,2,3,4,5].map(n=>[n,CURRENT.filter(x=>Math.round(x['Overall Rasa'])===n).length]);const md=Math.max(1,...dist.map(x=>x[1]));document.getElementById('rating').innerHTML=dist.map(x=>`<div class="tcol"><b>${{x[1]}}</b><div class="bar" style="height:${{Math.max(3,x[1]/md*125)}}px"></div>${{x[0]}}</div>`).join('');
  const cs=['Ayam','Sambal','Kol Goreng','Tahu','Tempe','Bayam Crispy','Overall Rasa','Overall Plating','Rasa vs Harga','Porsi vs Harga'];document.getElementById('rows').innerHTML=[...CURRENT].sort((a,b)=>new Date(b.Timestamp)-new Date(a.Timestamp)).map(x=>`<tr><td>${{dmy(x.Timestamp)}} ${{x.Timestamp.slice(11,16)}}</td><td>${{esc(x.Outlet)}}</td>${{cs.map(c=>`<td>${{Number.isFinite(x[c])?`<span class="pill">${{x[c]}}</span>`:''}}</td>`).join('')}}<td>${{esc(x.Review)}}</td></tr>`).join('');renderReviews()}}
 
-function normtxt(s){{return String(s||'').toLowerCase().replace(/\s+/g,' ').trim()}}
+function normtxt(s){{return String(s||'').toLowerCase().replace(/\\s+/g,' ').trim()}}
 function openAttr(name){{
  const rows=CURRENT.filter(x=>Number.isFinite(x[name])), rules=KEYWORDS.filter(k=>k.group===name), grouped={{}};
  rows.forEach(x=>{{const txt=normtxt(x.Review), matched=new Set();rules.forEach(k=>{{if(txt.includes(normtxt(k.keyword)))matched.add(k.reason)}});matched.forEach(reason=>{{if(!grouped[reason])grouped[reason]={{count:0,sum:0,ratings:[0,0,0,0,0]}};const g=grouped[reason],rt=Number(x[name]);g.count++;g.sum+=rt;if(rt>=1&&rt<=5)g.ratings[Math.round(rt)-1]++}})}});
