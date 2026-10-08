@@ -69,18 +69,18 @@ def prepare(raw):
     if missing: raise RuntimeError('Kolom rating belum cocok: '+', '.join(missing)+'. Kolom Excel: '+' | '.join(map(str,cols)))
     d=pd.DataFrame()
     ts=raw[found['Timestamp']]
-    # Source survey dates are DD/MM/YYYY (optionally with time). Parse explicitly so 02/10/2026 = 2 Oct 2026,
-    # never 10 Feb 2026. Excel/native datetime values are handled by the fallback.
-    parsed=pd.to_datetime(ts,format='%d/%m/%Y %H:%M:%S',errors='coerce')
+    # Source survey dates are MM/DD/YYYY (optionally with time). Example: 10/02/2026 = 2 Oct 2026.
+    # Parse month-first explicitly before any generic fallback.
+    parsed=pd.to_datetime(ts,format='%m/%d/%Y %H:%M:%S',errors='coerce')
     mask=parsed.isna()
     if mask.any():
-        parsed.loc[mask]=pd.to_datetime(ts.loc[mask],format='%d/%m/%Y %H:%M',errors='coerce')
+        parsed.loc[mask]=pd.to_datetime(ts.loc[mask],format='%m/%d/%Y %H:%M',errors='coerce')
     mask=parsed.isna()
     if mask.any():
-        parsed.loc[mask]=pd.to_datetime(ts.loc[mask],format='%d/%m/%Y',errors='coerce')
+        parsed.loc[mask]=pd.to_datetime(ts.loc[mask],format='%m/%d/%Y',errors='coerce')
     mask=parsed.isna()
     if mask.any():
-        parsed.loc[mask]=pd.to_datetime(ts.loc[mask],errors='coerce',dayfirst=True)
+        parsed.loc[mask]=pd.to_datetime(ts.loc[mask],errors='coerce',dayfirst=False)
     d['Timestamp']=parsed
     d['Outlet']=raw[found['Outlet']].fillna('').astype(str).str.strip() if found['Outlet'] else 'Semua Outlet'
     for k in ratings: d[k]=pd.to_numeric(raw[found[k]],errors='coerce')
