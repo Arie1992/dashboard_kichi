@@ -118,6 +118,11 @@ def make_html(df, kw):
 .reasonline:last-child{{border-bottom:0}}.reasonline b{{color:#173f4b}}.reasonrating{{font-weight:800;color:#b8493d;white-space:nowrap}}
 .originalcomment{{margin-top:10px;padding-top:10px;border-top:1px dashed #d7e0de}}.originalcomment small{{display:block;color:#78898d;font-weight:800;margin-bottom:4px;text-transform:uppercase}}
 .reasonTable{{width:100%;border-collapse:collapse}}.reasonTable th,.reasonTable td{{padding:11px 9px;border-bottom:1px solid #e7eceb;font-size:11px}}.reasonname{{font-weight:750}}
+
+.review{{max-height:520px;overflow-y:auto;padding-right:6px;scrollbar-gutter:stable}}
+.review::-webkit-scrollbar{{width:7px}}.review::-webkit-scrollbar-thumb{{background:#c6d2d1;border-radius:10px}}
+.attr{{cursor:pointer;position:relative}}.attr:after{{content:'Klik untuk detail';display:block;margin-top:7px;font-size:8px;color:#829397;font-weight:700}}
+.attr:hover{{border-color:#2f98a5;box-shadow:0 6px 16px #153c4618}}
 </style></head><body>
 <header class="hero"><div class="eyebrow">MARKET INSIGHT · CUSTOMER SURVEY</div><h1>Ayam Geprek Kichi-Kichi</h1><p>Ringkasan penilaian produk dan detail respons pelanggan.</p>
 <form class="filters" id="mainFilter"><label class="field"><b>PERIODE DARI</b><input id="dateFrom" type="date" min="{mn}" max="{mx}" value="{mn}"></label><label class="field"><b>SAMPAI</b><input id="dateTo" type="date" min="{mn}" max="{mx}" value="{mx}"></label><label class="field"><b>OUTLET</b><select id="outletFilter"></select></label><button class="btn">Terapkan</button></form></header>
@@ -173,7 +178,7 @@ document.getElementById('mainFilter').onsubmit=e=>{{e.preventDefault();render()}
 </script></body></html>'''
 
 try:
-    raw,kw=load_sharepoint(); df,mapping=prepare(raw); components.html(make_html(df,kw),height=2600,scrolling=True)
+    raw,kw=load_sharepoint(); df,mapping=prepare(raw); components.html(make_html(df,kw),height=2050,scrolling=True)
 except Exception as e:
     st.error('Dashboard gagal membaca data SharePoint live. Tidak ada data dummy/fallback yang digunakan.')
     st.code(str(e))
